@@ -1,0 +1,152 @@
+'use client';
+
+import { useState } from 'react';
+import { Copy, ExternalLink, MessageCircle, Clock } from 'lucide-react';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { LeadForm } from './lead-form';
+import { useStore } from '@/hooks/use-store';
+import { formatCurrency, formatRelative, formatWhatsAppLink } from '@/lib/utils';
+import { applyTemplate } from '@/lib/seed';
+import { SOURCE_LABELS, STATUS_LABELS, type Lead } from '@/types';
+
+interface LeadDetailModalProps {
+  lead: Lead | null;
+  open: boolean;
+  onClose: () => void;
+}
+
+export function LeadDetailModal({ lead, open, onClose }: LeadDetailModalProps) {
+  const { getActivities, updateLead, addActivity, templates, scheduleFollowUp } = useStore();
+  const [editing, setEditing] = useState(false);
+
+  if (!lead) return null;
+
+  const activities = getActivities(lead.id);
+  const welcomeTemplate = templates.find((t) => t.category === 'welcome');
+
+  const handleWhatsApp = () => {
+    const message = welcomeTemplate
+      ? applyTemplate(welcomeTemplate.content, lead.name)
+      : `Olá ${lead.name.split(' ')[0]}! Como posso ajudar?`;
+    navigator.clipboard.writeText(message);
+    toast.success('Mensagem copiada! Abrindo WhatsApp...');
+    addActivity(lead.id, 'whatsapp_sent', 'Mensagem enviada', message);
+    window.open(formatWhatsAppLink(lead.whatsapp, message), '_blank');
+  };
+
+  const handleFollowUp = (delay: '1h' | '1d' | '3d') => {
+    const tpl = templates.find((t) => t.name.toLowerCase().includes(delay === '1h' ? '1 hora' : delay === '1d' ? '1 dia' : '3 dia'))
+      || templates.find((t) => t.category === 'followup');
+    if (!tpl) return;
+    const content = applyTemplate(tpl.content, lead.name);
+    scheduleFollowUp(lead.id, tpl.id, content, delay);
+    toast.success(`Follow-up de ${delay} agendado!`);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-2xl" onClose={onClose}>
+        {editing ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Editar Lead</DialogTitle>
+            </DialogHeader>
+            <LeadForm
+              initial={lead}
+              onSubmit={(data) => {
+                updateLead(lead.id, data);
+                toast.success('Lead atualizado!');
+                setEditing(false);
+              }}
+              onCancel={() => setEditing(false)}
+            />
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <div className="flex items-start justify-between pr-8">
+                <div>
+                  <DialogTitle className="text-xl">{lead.name}</DialogTitle>
+                  <p className="text-sm text-zinc-400 mt-1">{lead.whatsapp}</p>
+                </div>
+                <Badge variant="default">{STATUS_LABELS[lead.status]}</Badge>
+              </div>
+            </DialogHeader>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+              <div className="rounded-lg bg-zinc-800/50 p-3">
+                <p className="text-xs text-zinc-500">Origem</p>
+                <p className="text-sm font-medium text-zinc-200">{SOURCE_LABELS[lead.source]}</p>
+              </div>
+              <div className="rounded-lg bg-zinc-800/50 p-3">
+                <p className="text-xs text-zinc-500">Valor</p>
+                <p className="text-sm font-medium text-zinc-200">{formatCurrency(lead.estimated_value)}</p>
+              </div>
+              <div className="rounded-lg bg-zinc-800/50 p-3">
+                <p className="text-xs text-zinc-500">Última interação</p>
+                <p className="text-sm font-medium text-zinc-200">{formatRelative(lead.last_interaction_at)}</p>
+              </div>
+            </div>
+
+            {lead.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {lead.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary">{tag}</Badge>
+                ))}
+              </div>
+            )}
+
+            {lead.notes && (
+              <div className="rounded-lg bg-zinc-800/30 p-3 mb-4">
+                <p className="text-xs text-zinc-500 mb-1">Observações</p>
+                <p className="text-sm text-zinc-300">{lead.notes}</p>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 mb-5">
+              <Button size="sm" onClick={handleWhatsApp}>
+                <MessageCircle className="h-4 w-4" />
+                Enviar WhatsApp
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleFollowUp('1h')}>
+                <Clock className="h-4 w-4" />
+                Follow-up 1h
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleFollowUp('1d')}>
+                <Clock className="h-4 w-4" />
+                Follow-up 1d
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleFollowUp('3d')}>
+                <Clock className="h-4 w-4" />
+                Follow-up 3d
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>Editar</Button>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium text-zinc-300 mb-3">Histórico de Interações</h4>
+              {activities.length === 0 ? (
+                <p className="text-sm text-zinc-500 text-center py-4">Sem interações registradas</p>
+              ) : (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {activities.map((act) => (
+                    <div key={act.id} className="flex items-start gap-2 text-sm border-l-2 border-zinc-700 pl-3 py-1">
+                      <div className="flex-1">
+                        <p className="text-zinc-200">{act.title}</p>
+                        {act.description && <p className="text-xs text-zinc-500">{act.description}</p>}
+                      </div>
+                      <span className="text-xs text-zinc-600 shrink-0">{formatRelative(act.created_at)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LeadFlow CRM
 
-## Getting Started
+CRM simples + funil de leads + WhatsApp automático para negócios locais (academias, clínicas, lojas).
 
-First, run the development server:
+## Funcionalidades
+
+- **Autenticação** — Login e registro com proteção de rotas
+- **Dashboard** — Métricas, gráfico de 7 dias e atividades recentes
+- **Funil Kanban** — Drag and drop entre 6 etapas
+- **Gestão de Leads** — CRUD completo com filtros por origem, status e tags
+- **WhatsApp** — Templates prontos, copiar mensagem e abrir WhatsApp Web
+- **Follow-ups** — Agendamento automático (1h, 1d, 3d)
+- **Configurações** — Templates editáveis e pipeline personalizável
+
+## Stack
+
+- Next.js 15 (App Router) + TypeScript
+- Tailwind CSS + shadcn/ui (dark mode)
+- Supabase (Auth + Database + Realtime)
+- @dnd-kit (drag and drop)
+- Recharts (gráficos)
+
+## Início Rápido (Modo Demo)
+
+O app funciona imediatamente sem Supabase, usando localStorage com 20 leads de demonstração da **PowerGym Academia**.
 
 ```bash
+cd leadflow-crm
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Login demo:** `admin@powergym.com.br` / `demo123`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup Supabase (Produção)
 
-## Learn More
+### 1. Criar projeto no Supabase
 
-To learn more about Next.js, take a look at the following resources:
+1. Acesse [supabase.com](https://supabase.com) e crie um projeto
+2. Vá em **Settings → API** e copie a URL e anon key
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2. Configurar variáveis de ambiente
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+cp .env.local.example .env.local
+```
 
-## Deploy on Vercel
+Preencha com suas credenciais do Supabase.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. Executar o schema
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+No **SQL Editor** do Supabase, execute na ordem:
+
+1. `supabase/schema.sql` — cria todas as tabelas e RLS
+2. `supabase/seed.sql` — insere 20 leads (substitua o UUID do usuário)
+
+### 4. Habilitar Auth
+
+No Supabase Dashboard → **Authentication → Providers**, habilite Email.
+
+## Deploy na Vercel
+
+1. Faça push do projeto para o GitHub
+2. Importe no [vercel.com](https://vercel.com)
+3. Adicione as variáveis de ambiente:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. Deploy
+
+## Estrutura do Projeto
+
+```
+leadflow-crm/
+├── app/
+│   ├── (dashboard)/     # Rotas protegidas
+│   │   ├── dashboard/
+│   │   ├── kanban/
+│   │   ├── leads/
+│   │   ├── whatsapp/
+│   │   └── settings/
+│   ├── login/
+│   └── register/
+├── components/
+│   ├── ui/              # shadcn/ui
+│   ├── layout/          # Sidebar, AuthGuard
+│   ├── dashboard/
+│   ├── kanban/
+│   └── leads/
+├── lib/
+│   ├── supabase/        # Cliente Supabase
+│   ├── store.ts         # Data layer (localStorage)
+│   └── seed.ts          # Dados demo
+├── hooks/
+├── types/
+└── supabase/
+    ├── schema.sql
+    └── seed.sql
+```
+
+## Banco de Dados
+
+| Tabela | Descrição |
+|--------|-----------|
+| `profiles` | Perfil do usuário/negócio |
+| `leads` | Leads com origem, status, valor |
+| `lead_activities` | Histórico de interações |
+| `message_templates` | Templates de WhatsApp |
+| `pipelines` | Funis de vendas |
+| `pipeline_stages` | Etapas do funil |
+| `scheduled_messages` | Follow-ups agendados |
+
+## Licença
+
+MIT
