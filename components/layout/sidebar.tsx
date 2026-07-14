@@ -31,7 +31,7 @@ export function Sidebar() {
   const { fullName, businessName, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const NavContent = () => (
+  const navContent = (
     <>
       <div className="flex items-center gap-3 px-4 py-6 border-b border-zinc-800">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-600">
@@ -74,8 +74,8 @@ export function Sidebar() {
           variant="ghost"
           size="sm"
           className="w-full justify-start text-zinc-400 hover:text-red-400"
-          onClick={() => {
-            logout();
+          onClick={async () => {
+            await logout();
             window.location.href = '/login';
           }}
         >
@@ -105,7 +105,7 @@ export function Sidebar() {
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <NavContent />
+        {navContent}
       </aside>
     </>
   );

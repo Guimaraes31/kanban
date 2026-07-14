@@ -1,11 +1,13 @@
 'use client';
 
 import { Toaster } from 'sonner';
+import { AuthProvider } from '@/hooks/use-auth';
+import { StoreProvider } from '@/hooks/use-store';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {children}
+      <AuthProvider><StoreProvider>{children}</StoreProvider></AuthProvider>
       <Toaster
         theme="dark"
         position="bottom-right"

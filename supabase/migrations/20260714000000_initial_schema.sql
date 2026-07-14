@@ -1,4 +1,4 @@
--- LeadFlow CRM - Schema Completo
+-- LeadFlow CRM - migration inicial para Supabase
 -- Execute no SQL Editor do Supabase
 
 -- Extensões
@@ -31,6 +31,8 @@ CREATE POLICY "Users can insert own profile" ON profiles
 -- Trigger para criar profile ao registrar
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  new_pipeline_id UUID;
 BEGIN
   INSERT INTO profiles (id, email, full_name, business_name)
   VALUES (
@@ -39,9 +41,26 @@ BEGIN
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
     COALESCE(NEW.raw_user_meta_data->>'business_name', '')
   );
+
+  INSERT INTO pipelines (user_id, name, is_default)
+  VALUES (NEW.id, 'Funil Principal', TRUE)
+  RETURNING id INTO new_pipeline_id;
+
+  INSERT INTO pipeline_stages (pipeline_id, name, slug, color, position) VALUES
+    (new_pipeline_id, 'Novo', 'novo', '#6366f1', 0),
+    (new_pipeline_id, 'Em Contato', 'em_contato', '#3b82f6', 1),
+    (new_pipeline_id, 'Interessado', 'interessado', '#f59e0b', 2),
+    (new_pipeline_id, 'Proposta', 'proposta', '#8b5cf6', 3),
+    (new_pipeline_id, 'Fechado', 'fechado', '#22c55e', 4),
+    (new_pipeline_id, 'Perdido', 'perdido', '#ef4444', 5);
+
+  INSERT INTO message_templates (user_id, name, content, category, is_default) VALUES
+    (NEW.id, 'Boas-vindas', 'Olá {{nome}}! Como posso ajudar?', 'welcome', TRUE),
+    (NEW.id, 'Follow-up 1 dia', 'Olá {{nome}}! Passando para saber se ficou alguma dúvida.', 'followup', TRUE),
+    (NEW.id, 'Proposta', 'Olá {{nome}}! Preparei uma proposta especial para você.', 'proposal', TRUE);
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users

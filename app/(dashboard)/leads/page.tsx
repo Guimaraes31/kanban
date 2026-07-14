@@ -128,10 +128,14 @@ export default function LeadsPage() {
                         variant="ghost"
                         size="sm"
                         className="text-red-400 hover:text-red-300"
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          deleteLead(lead.id);
-                          toast.success('Lead removido');
+                          try {
+                            await deleteLead(lead.id);
+                            toast.success('Lead removido');
+                          } catch (error) {
+                            toast.error(error instanceof Error ? error.message : 'Erro ao remover lead');
+                          }
                         }}
                       >
                         Excluir
@@ -151,10 +155,14 @@ export default function LeadsPage() {
             <DialogTitle>Novo Lead</DialogTitle>
           </DialogHeader>
           <LeadForm
-            onSubmit={(data) => {
-              createLead(data);
-              toast.success('Lead criado com sucesso!');
-              setShowCreate(false);
+            onSubmit={async (data) => {
+              try {
+                await createLead(data);
+                toast.success('Lead criado com sucesso!');
+                setShowCreate(false);
+              } catch (error) {
+                toast.error(error instanceof Error ? error.message : 'Erro ao criar lead');
+              }
             }}
             onCancel={() => setShowCreate(false)}
           />

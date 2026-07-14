@@ -10,22 +10,33 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useStore } from '@/hooks/use-store';
 import { generateId } from '@/lib/utils';
-import type { MessageTemplate, PipelineStage } from '@/types';
+import type { PipelineStage } from '@/types';
 
 export default function SettingsPage() {
-  const { templates, pipeline, updateTemplate, createTemplate, updatePipelineStages } = useStore();
+  const { loading, templates, pipeline, updateTemplate, createTemplate, updatePipelineStages } = useStore();
+
+  if (loading) return <p className="text-sm text-zinc-500">Carregando configurações...</p>;
+
+  return <SettingsContent key={`${pipeline.updated_at}-${templates.length}`} templates={templates} pipeline={pipeline} updateTemplate={updateTemplate} createTemplate={createTemplate} updatePipelineStages={updatePipelineStages} />;
+}
+
+function SettingsContent({ templates, pipeline, updateTemplate, createTemplate, updatePipelineStages }: Pick<ReturnType<typeof useStore>, 'templates' | 'pipeline' | 'updateTemplate' | 'createTemplate' | 'updatePipelineStages'>) {
   const [editingTemplates, setEditingTemplates] = useState(templates);
   const [stages, setStages] = useState<PipelineStage[]>([...pipeline.stages].sort((a, b) => a.position - b.position));
 
-  const handleSaveTemplate = (id: string) => {
+  const handleSaveTemplate = async (id: string) => {
     const tpl = editingTemplates.find((t) => t.id === id);
     if (!tpl) return;
-    updateTemplate(id, { name: tpl.name, content: tpl.content });
-    toast.success('Template salvo!');
+    try {
+      await updateTemplate(id, { name: tpl.name, content: tpl.content });
+      toast.success('Template salvo!');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao salvar template');
+    }
   };
 
-  const handleAddTemplate = () => {
-    const newTpl = createTemplate({
+  const handleAddTemplate = async () => {
+    const newTpl = await createTemplate({
       name: 'Novo Template',
       content: 'Olá {{nome}}! Mensagem personalizada aqui.',
       category: 'custom',
@@ -35,9 +46,13 @@ export default function SettingsPage() {
     toast.success('Template criado!');
   };
 
-  const handleSavePipeline = () => {
-    updatePipelineStages(stages);
-    toast.success('Pipeline atualizado!');
+  const handleSavePipeline = async () => {
+    try {
+      await updatePipelineStages(stages);
+      toast.success('Pipeline atualizado!');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar pipeline');
+    }
   };
 
   const handleAddStage = () => {

@@ -10,7 +10,6 @@ import { Select } from '@/components/ui/select';
 import { useStore } from '@/hooks/use-store';
 import { applyTemplate } from '@/lib/seed';
 import { formatDate, formatWhatsAppLink } from '@/lib/utils';
-import type { Lead } from '@/types';
 
 export default function WhatsAppPage() {
   const { templates, leads, scheduledMessages, addActivity } = useStore();
@@ -19,7 +18,6 @@ export default function WhatsAppPage() {
   const [previewMessage, setPreviewMessage] = useState('');
 
   const selectedLead = leads.find((l) => l.id === selectedLeadId);
-  const selectedTemplate = templates.find((t) => t.id === selectedTemplateId);
 
   const updatePreview = (leadId: string, templateId: string) => {
     const lead = leads.find((l) => l.id === leadId);
@@ -41,13 +39,13 @@ export default function WhatsAppPage() {
     updatePreview(selectedLeadId, templateId);
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!selectedLead || !previewMessage) {
       toast.error('Selecione um lead e um template');
       return;
     }
     navigator.clipboard.writeText(previewMessage);
-    addActivity(selectedLead.id, 'whatsapp_sent', 'Mensagem enviada', previewMessage);
+    await addActivity(selectedLead.id, 'whatsapp_sent', 'Mensagem enviada', previewMessage);
     toast.success('Mensagem copiada! Abrindo WhatsApp...');
     window.open(formatWhatsAppLink(selectedLead.whatsapp, previewMessage), '_blank');
   };

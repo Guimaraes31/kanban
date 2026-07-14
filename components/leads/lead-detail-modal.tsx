@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, ExternalLink, MessageCircle, Clock } from 'lucide-react';
+import { MessageCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -27,22 +27,22 @@ export function LeadDetailModal({ lead, open, onClose }: LeadDetailModalProps) {
   const activities = getActivities(lead.id);
   const welcomeTemplate = templates.find((t) => t.category === 'welcome');
 
-  const handleWhatsApp = () => {
+  const handleWhatsApp = async () => {
     const message = welcomeTemplate
       ? applyTemplate(welcomeTemplate.content, lead.name)
       : `Olá ${lead.name.split(' ')[0]}! Como posso ajudar?`;
     navigator.clipboard.writeText(message);
     toast.success('Mensagem copiada! Abrindo WhatsApp...');
-    addActivity(lead.id, 'whatsapp_sent', 'Mensagem enviada', message);
+    await addActivity(lead.id, 'whatsapp_sent', 'Mensagem enviada', message);
     window.open(formatWhatsAppLink(lead.whatsapp, message), '_blank');
   };
 
-  const handleFollowUp = (delay: '1h' | '1d' | '3d') => {
+  const handleFollowUp = async (delay: '1h' | '1d' | '3d') => {
     const tpl = templates.find((t) => t.name.toLowerCase().includes(delay === '1h' ? '1 hora' : delay === '1d' ? '1 dia' : '3 dia'))
       || templates.find((t) => t.category === 'followup');
     if (!tpl) return;
     const content = applyTemplate(tpl.content, lead.name);
-    scheduleFollowUp(lead.id, tpl.id, content, delay);
+    await scheduleFollowUp(lead.id, tpl.id, content, delay);
     toast.success(`Follow-up de ${delay} agendado!`);
   };
 
@@ -56,8 +56,8 @@ export function LeadDetailModal({ lead, open, onClose }: LeadDetailModalProps) {
             </DialogHeader>
             <LeadForm
               initial={lead}
-              onSubmit={(data) => {
-                updateLead(lead.id, data);
+              onSubmit={async (data) => {
+                await updateLead(lead.id, data);
                 toast.success('Lead atualizado!');
                 setEditing(false);
               }}

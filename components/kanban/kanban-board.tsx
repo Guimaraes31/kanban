@@ -37,7 +37,7 @@ export function KanbanBoard() {
     if (lead) setActiveLead(lead);
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     setActiveLead(null);
     const { active, over } = event;
     if (!over) return;
@@ -56,8 +56,12 @@ export function KanbanBoard() {
     }
 
     if (newStatus && newStatus !== lead.status) {
-      moveLeadStatus(leadId, newStatus);
-      toast.success(`Lead movido para ${stages.find((s) => s.slug === newStatus)?.name}`);
+      try {
+        await moveLeadStatus(leadId, newStatus);
+        toast.success(`Lead movido para ${stages.find((s) => s.slug === newStatus)?.name}`);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Erro ao mover lead');
+      }
     }
   };
 

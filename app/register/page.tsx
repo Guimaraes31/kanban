@@ -24,11 +24,16 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      register(email, password, fullName, businessName);
-      toast.success('Conta criada com sucesso!');
-      router.push('/dashboard');
-    } catch {
-      toast.error('Erro ao criar conta');
+      const signedIn = await register(email, password, fullName, businessName);
+      if (signedIn) {
+        toast.success('Conta criada com sucesso!');
+        router.push('/dashboard');
+      } else {
+        toast.success('Conta criada! Confirme seu email antes de entrar.');
+        router.push('/login');
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao criar conta');
     } finally {
       setLoading(false);
     }

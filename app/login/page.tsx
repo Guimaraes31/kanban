@@ -12,8 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/hooks/use-auth';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('admin@powergym.com.br');
-  const [password, setPassword] = useState('demo123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
@@ -22,11 +22,11 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      login(email, password);
+      await login(email, password);
       toast.success('Bem-vindo ao LeadFlow CRM!');
       router.push('/dashboard');
-    } catch {
-      toast.error('Erro ao fazer login');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao fazer login');
     } finally {
       setLoading(false);
     }
@@ -67,9 +67,6 @@ export default function LoginPage() {
             <p className="text-center text-sm text-zinc-500 mt-4">
               Não tem conta?{' '}
               <Link href="/register" className="text-violet-400 hover:underline">Criar conta</Link>
-            </p>
-            <p className="text-center text-xs text-zinc-600 mt-2">
-              Demo: admin@powergym.com.br / demo123
             </p>
           </CardContent>
         </Card>
