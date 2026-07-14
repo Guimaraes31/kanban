@@ -5,7 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { KanbanCard } from './kanban-card';
 import type { Lead, PipelineStage } from '@/types';
 import { formatCurrency } from '@/lib/utils';
-import { VALUE_COLOR_CLASS } from '@/lib/lead-colors';
+import { getStatusDotColor, VALUE_COLOR_CLASS } from '@/lib/lead-colors';
 
 interface KanbanColumnProps {
   stage: PipelineStage;
@@ -16,6 +16,7 @@ interface KanbanColumnProps {
 export function KanbanColumn({ stage, leads, onCardClick }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: stage.slug });
   const totalValue = leads.reduce((sum, l) => sum + l.estimated_value, 0);
+  const dotColor = getStatusDotColor(stage.slug, stage.color);
 
   return (
     <div
@@ -26,7 +27,10 @@ export function KanbanColumn({ stage, leads, onCardClick }: KanbanColumnProps) {
     >
       <div className="flex items-center justify-between p-3 border-b border-zinc-800">
         <div className="flex items-center gap-2">
-          <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: stage.color }} />
+          <div
+            className="h-3 w-3 rounded-full shrink-0"
+            style={{ backgroundColor: dotColor, boxShadow: `0 0 8px ${dotColor}66` }}
+          />
           <span className="text-sm font-medium text-zinc-200">{stage.name}</span>
           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-800 px-1.5 text-xs text-zinc-400">
             {leads.length}

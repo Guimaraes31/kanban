@@ -3,6 +3,15 @@ import type { LeadSource, LeadStatus } from '@/types';
 export const VALUE_COLOR_CLASS = 'text-emerald-400 font-medium';
 export const DELETE_BUTTON_CLASS = 'text-red-500 hover:text-red-400 hover:bg-red-500/10';
 
+export const STATUS_DOT_COLORS: Record<LeadStatus, string> = {
+  novo: '#3b82f6',
+  em_contato: '#f59e0b',
+  interessado: '#a855f7',
+  proposta: '#f97316',
+  fechado: '#22c55e',
+  perdido: '#ef4444',
+};
+
 export const STATUS_COLORS: Record<LeadStatus, string> = {
   novo: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
   em_contato: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
@@ -31,6 +40,10 @@ const TAG_COLORS = [
 
 export function getStatusColorClasses(status: LeadStatus): string {
   return STATUS_COLORS[status];
+}
+
+export function getStatusDotColor(status: LeadStatus | string, fallback = '#a1a1aa'): string {
+  return STATUS_DOT_COLORS[status as LeadStatus] ?? fallback;
 }
 
 export function getSourceColorClasses(source: LeadSource): string {
