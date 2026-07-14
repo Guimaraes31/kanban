@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -64,10 +63,6 @@ export default function LoginPage() {
                 {loading ? 'Entrando...' : 'Entrar'}
               </Button>
             </form>
-            <p className="text-center text-sm text-zinc-500 mt-4">
-              Não tem conta?{' '}
-              <Link href="/register" className="text-violet-400 hover:underline">Criar conta</Link>
-            </p>
           </CardContent>
         </Card>
       </div>
