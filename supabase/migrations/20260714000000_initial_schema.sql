@@ -1,4 +1,4 @@
--- LeadFlow CRM - migration inicial para Supabase
+-- NG COMPANY - migration inicial para Supabase
 -- Execute no SQL Editor do Supabase
 
 -- Extensões
@@ -47,12 +47,12 @@ BEGIN
   RETURNING id INTO new_pipeline_id;
 
   INSERT INTO pipeline_stages (pipeline_id, name, slug, color, position) VALUES
-    (new_pipeline_id, 'Novo', 'novo', '#6366f1', 0),
-    (new_pipeline_id, 'Em Contato', 'em_contato', '#3b82f6', 1),
-    (new_pipeline_id, 'Interessado', 'interessado', '#f59e0b', 2),
-    (new_pipeline_id, 'Proposta', 'proposta', '#8b5cf6', 3),
-    (new_pipeline_id, 'Fechado', 'fechado', '#22c55e', 4),
-    (new_pipeline_id, 'Perdido', 'perdido', '#ef4444', 5);
+    (new_pipeline_id, 'Novo', 'novo', '#fafafa', 0),
+    (new_pipeline_id, 'Em Contato', 'em_contato', '#d4d4d8', 1),
+    (new_pipeline_id, 'Interessado', 'interessado', '#a1a1aa', 2),
+    (new_pipeline_id, 'Proposta', 'proposta', '#71717a', 3),
+    (new_pipeline_id, 'Fechado', 'fechado', '#52525b', 4),
+    (new_pipeline_id, 'Perdido', 'perdido', '#27272a', 5);
 
   INSERT INTO message_templates (user_id, name, content, category, is_default) VALUES
     (NEW.id, 'Boas-vindas', 'Olá {{nome}}! Como posso ajudar?', 'welcome', TRUE),
@@ -91,7 +91,7 @@ CREATE TABLE pipeline_stages (
   pipeline_id UUID NOT NULL REFERENCES pipelines(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   slug TEXT NOT NULL,
-  color TEXT NOT NULL DEFAULT '#6366f1',
+  color TEXT NOT NULL DEFAULT '#a1a1aa',
   position INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

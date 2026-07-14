@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'LeadFlow CRM',
+  title: 'NG COMPANY',
   description: 'CRM Simples + Funil de Leads + WhatsApp Automático para negócios locais',
 };
 

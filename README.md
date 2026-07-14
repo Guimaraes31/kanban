@@ -1,4 +1,4 @@
-# LeadFlow CRM
+# NG COMPANY
 
 CRM com funil Kanban, gestão de leads, templates de WhatsApp e follow-ups.
 

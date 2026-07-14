@@ -70,7 +70,7 @@ export default function WhatsAppPage() {
         <Card className="border-zinc-800 bg-zinc-900/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-green-400" />
+              <MessageCircle className="h-5 w-5 text-white" />
               Enviar Mensagem
             </CardTitle>
           </CardHeader>
@@ -115,7 +115,7 @@ export default function WhatsAppPage() {
         <Card className="border-zinc-800 bg-zinc-900/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-amber-400" />
+              <Clock className="h-5 w-5 text-zinc-300" />
               Templates Disponíveis
             </CardTitle>
           </CardHeader>
@@ -124,7 +124,7 @@ export default function WhatsAppPage() {
               <div
                 key={tpl.id}
                 className={`rounded-lg border p-3 cursor-pointer transition-colors ${
-                  selectedTemplateId === tpl.id ? 'border-violet-500/50 bg-violet-600/5' : 'border-zinc-800 hover:border-zinc-700'
+                  selectedTemplateId === tpl.id ? 'border-white bg-white/5' : 'border-zinc-800 hover:border-zinc-700'
                 }`}
                 onClick={() => handleTemplateChange(tpl.id)}
               >
@@ -142,7 +142,7 @@ export default function WhatsAppPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-zinc-800 bg-zinc-900/50">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-amber-400">
+            <CardTitle className="flex items-center gap-2 text-zinc-300">
               <Clock className="h-5 w-5" />
               Follow-ups Pendentes ({pendingMessages.length})
             </CardTitle>
@@ -171,7 +171,7 @@ export default function WhatsAppPage() {
 
         <Card className="border-zinc-800 bg-zinc-900/50">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-400">
+            <CardTitle className="flex items-center gap-2 text-white">
               <CheckCircle className="h-5 w-5" />
               Mensagens Enviadas
             </CardTitle>

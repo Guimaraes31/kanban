@@ -34,7 +34,7 @@ export function LeadsChart({ data }: LeadsChartProps) {
               }}
               formatter={(value) => [`${value} leads`, 'Total']}
             />
-            <Bar dataKey="count" fill="#7c3aed" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="count" fill="#fafafa" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

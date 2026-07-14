@@ -9,7 +9,7 @@ import {
   MessageCircle,
   Settings,
   LogOut,
-  Zap,
+  Asterisk,
   Menu,
   X,
 } from 'lucide-react';
@@ -34,11 +34,11 @@ export function Sidebar() {
   const navContent = (
     <>
       <div className="flex items-center gap-3 px-4 py-6 border-b border-zinc-800">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-600">
-          <Zap className="h-5 w-5 text-white" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white">
+          <Asterisk className="h-5 w-5 text-black" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-zinc-100">LeadFlow CRM</p>
+          <p className="text-sm font-semibold text-zinc-100">NG COMPANY</p>
           <p className="text-xs text-zinc-500 truncate max-w-[140px]">{businessName || 'Meu Negócio'}</p>
         </div>
       </div>
@@ -54,7 +54,7 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-violet-600/15 text-violet-300 border border-violet-600/20'
+                  ? 'bg-white text-black border border-white'
                   : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
               )}
             >
@@ -73,7 +73,7 @@ export function Sidebar() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-zinc-400 hover:text-red-400"
+          className="w-full justify-start text-zinc-400 hover:text-white"
           onClick={async () => {
             await logout();
             window.location.href = '/login';

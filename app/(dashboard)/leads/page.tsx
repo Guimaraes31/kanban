@@ -121,13 +121,13 @@ export default function LeadsPage() {
                     <td className="p-3">
                       <Badge variant="default">{STATUS_LABELS[lead.status]}</Badge>
                     </td>
-                    <td className="p-3 text-emerald-400 hidden lg:table-cell">{formatCurrency(lead.estimated_value)}</td>
+                    <td className="p-3 text-zinc-100 hidden lg:table-cell">{formatCurrency(lead.estimated_value)}</td>
                     <td className="p-3 text-zinc-500 text-xs hidden lg:table-cell">{formatRelative(lead.last_interaction_at)}</td>
                     <td className="p-3 text-right">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-red-400 hover:text-red-300"
+                        className="text-zinc-400 hover:text-white"
                         onClick={async (e) => {
                           e.stopPropagation();
                           try {

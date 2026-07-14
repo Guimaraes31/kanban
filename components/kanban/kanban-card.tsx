@@ -29,7 +29,7 @@ export function KanbanCard({ lead, onClick, isDragging }: KanbanCardProps) {
       ref={setNodeRef}
       style={style}
       className={`group rounded-lg border border-zinc-800 bg-zinc-900 p-3 cursor-pointer hover:border-zinc-700 hover:bg-zinc-800/80 transition-all ${
-        isDragging ? 'shadow-xl border-violet-500/30' : ''
+        isDragging ? 'shadow-xl border-white/50' : ''
       }`}
       onClick={onClick}
     >
@@ -53,7 +53,7 @@ export function KanbanCard({ lead, onClick, isDragging }: KanbanCardProps) {
 
       <div className="flex items-center justify-between mt-2.5">
         <Badge variant="outline" className="text-[10px]">{SOURCE_LABELS[lead.source]}</Badge>
-        <span className="text-xs font-medium text-emerald-400">{formatCurrency(lead.estimated_value)}</span>
+        <span className="text-xs font-medium text-zinc-100">{formatCurrency(lead.estimated_value)}</span>
       </div>
 
       <p className="text-[10px] text-zinc-600 mt-2">{formatRelative(lead.last_interaction_at)}</p>

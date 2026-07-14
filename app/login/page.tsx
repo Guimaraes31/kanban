@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Zap } from 'lucide-react';
+import { Asterisk } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      toast.success('Bem-vindo ao LeadFlow CRM!');
+      toast.success('Bem-vindo à NG COMPANY!');
       router.push('/dashboard');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao fazer login');
@@ -35,11 +35,11 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600">
-            <Zap className="h-6 w-6 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white">
+            <Asterisk className="h-6 w-6 text-black" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-zinc-100">LeadFlow CRM</h1>
+            <h1 className="text-xl font-bold text-zinc-100">NG COMPANY</h1>
             <p className="text-xs text-zinc-500">Gestão de leads simplificada</p>
           </div>
         </div>

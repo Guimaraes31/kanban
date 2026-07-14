@@ -61,7 +61,7 @@ function SettingsContent({ templates, pipeline, updateTemplate, createTemplate, 
       pipeline_id: pipeline.id,
       name: 'Nova Etapa',
       slug: `custom_${Date.now()}` as PipelineStage['slug'],
-      color: '#6366f1',
+      color: '#a1a1aa',
       position: stages.length,
       created_at: new Date().toISOString(),
     };
@@ -170,7 +170,7 @@ function SettingsContent({ templates, pipeline, updateTemplate, createTemplate, 
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-red-400 hover:text-red-300"
+                className="text-zinc-400 hover:text-white"
                 onClick={() => handleRemoveStage(stage.id)}
               >
                 <Trash2 className="h-4 w-4" />

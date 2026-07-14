@@ -1,4 +1,4 @@
--- LeadFlow CRM - Seed Data (Academia PowerGym)
+-- NG COMPANY - Seed Data (Academia PowerGym)
 -- Execute APÓS criar um usuário e substituir USER_ID pelo UUID real
 
 -- Substitua este UUID pelo ID do usuário autenticado:
@@ -15,12 +15,12 @@ BEGIN
 
   -- Etapas do pipeline
   INSERT INTO pipeline_stages (pipeline_id, name, slug, color, position) VALUES
-    (v_pipeline_id, 'Novo', 'novo', '#6366f1', 0),
-    (v_pipeline_id, 'Em Contato', 'em_contato', '#3b82f6', 1),
-    (v_pipeline_id, 'Interessado', 'interessado', '#f59e0b', 2),
-    (v_pipeline_id, 'Proposta', 'proposta', '#8b5cf6', 3),
-    (v_pipeline_id, 'Fechado', 'fechado', '#22c55e', 4),
-    (v_pipeline_id, 'Perdido', 'perdido', '#ef4444', 5);
+    (v_pipeline_id, 'Novo', 'novo', '#fafafa', 0),
+    (v_pipeline_id, 'Em Contato', 'em_contato', '#d4d4d8', 1),
+    (v_pipeline_id, 'Interessado', 'interessado', '#a1a1aa', 2),
+    (v_pipeline_id, 'Proposta', 'proposta', '#71717a', 3),
+    (v_pipeline_id, 'Fechado', 'fechado', '#52525b', 4),
+    (v_pipeline_id, 'Perdido', 'perdido', '#27272a', 5);
 
   -- Templates
   INSERT INTO message_templates (user_id, name, content, category, is_default) VALUES

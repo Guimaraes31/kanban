@@ -20,7 +20,7 @@ export function KanbanColumn({ stage, leads, onCardClick }: KanbanColumnProps) {
     <div
       ref={setNodeRef}
       className={`flex w-72 shrink-0 flex-col rounded-xl border bg-zinc-900/30 transition-colors ${
-        isOver ? 'border-violet-500/50 bg-violet-600/5' : 'border-zinc-800'
+        isOver ? 'border-white bg-white/5' : 'border-zinc-800'
       }`}
     >
       <div className="flex items-center justify-between p-3 border-b border-zinc-800">

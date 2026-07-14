@@ -15,11 +15,11 @@ const iconMap = {
 };
 
 const colorMap = {
-  created: 'text-green-400 bg-green-600/10',
-  updated: 'text-blue-400 bg-blue-600/10',
-  status_change: 'text-violet-400 bg-violet-600/10',
-  whatsapp_sent: 'text-emerald-400 bg-emerald-600/10',
-  whatsapp_scheduled: 'text-amber-400 bg-amber-600/10',
+  created: 'text-white bg-white/10',
+  updated: 'text-zinc-200 bg-white/10',
+  status_change: 'text-zinc-300 bg-white/10',
+  whatsapp_sent: 'text-zinc-100 bg-white/10',
+  whatsapp_scheduled: 'text-zinc-400 bg-white/10',
   note: 'text-zinc-400 bg-zinc-800',
 };
 
