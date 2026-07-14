@@ -5,6 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { KanbanCard } from './kanban-card';
 import type { Lead, PipelineStage } from '@/types';
 import { formatCurrency } from '@/lib/utils';
+import { VALUE_COLOR_CLASS } from '@/lib/lead-colors';
 
 interface KanbanColumnProps {
   stage: PipelineStage;
@@ -34,7 +35,7 @@ export function KanbanColumn({ stage, leads, onCardClick }: KanbanColumnProps) {
       </div>
 
       {totalValue > 0 && (
-        <p className="px-3 py-1.5 text-xs text-zinc-500">{formatCurrency(totalValue)}</p>
+        <p className={`px-3 py-1.5 text-xs ${VALUE_COLOR_CLASS}`}>{formatCurrency(totalValue)}</p>
       )}
 
       <SortableContext items={leads.map((l) => l.id)} strategy={verticalListSortingStrategy}>

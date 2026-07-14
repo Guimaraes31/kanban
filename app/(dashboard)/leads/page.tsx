@@ -12,6 +12,7 @@ import { LeadForm } from '@/components/leads/lead-form';
 import { LeadDetailModal } from '@/components/leads/lead-detail-modal';
 import { useStore } from '@/hooks/use-store';
 import { formatCurrency, formatRelative } from '@/lib/utils';
+import { DELETE_BUTTON_CLASS, getSourceColorClasses, getStatusColorClasses, getTagColorClasses, VALUE_COLOR_CLASS } from '@/lib/lead-colors';
 import { LEAD_SOURCES, SOURCE_LABELS, STATUS_LABELS, type Lead, type LeadSource, type LeadStatus } from '@/types';
 
 export default function LeadsPage() {
@@ -109,25 +110,25 @@ export default function LeadsPage() {
                       {lead.tags.length > 0 && (
                         <div className="flex gap-1 mt-1">
                           {lead.tags.slice(0, 2).map((t) => (
-                            <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
+                            <Badge key={t} variant="outline" className={`text-[10px] ${getTagColorClasses(t)}`}>{t}</Badge>
                           ))}
                         </div>
                       )}
                     </td>
                     <td className="p-3 text-zinc-400 hidden sm:table-cell">{lead.whatsapp}</td>
                     <td className="p-3 hidden md:table-cell">
-                      <Badge variant="outline">{SOURCE_LABELS[lead.source]}</Badge>
+                      <Badge variant="outline" className={getSourceColorClasses(lead.source)}>{SOURCE_LABELS[lead.source]}</Badge>
                     </td>
                     <td className="p-3">
-                      <Badge variant="default">{STATUS_LABELS[lead.status]}</Badge>
+                      <Badge variant="outline" className={getStatusColorClasses(lead.status)}>{STATUS_LABELS[lead.status]}</Badge>
                     </td>
-                    <td className="p-3 text-zinc-100 hidden lg:table-cell">{formatCurrency(lead.estimated_value)}</td>
+                    <td className={`p-3 hidden lg:table-cell ${VALUE_COLOR_CLASS}`}>{formatCurrency(lead.estimated_value)}</td>
                     <td className="p-3 text-zinc-500 text-xs hidden lg:table-cell">{formatRelative(lead.last_interaction_at)}</td>
                     <td className="p-3 text-right">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-zinc-400 hover:text-white"
+                        className={DELETE_BUTTON_CLASS}
                         onClick={async (e) => {
                           e.stopPropagation();
                           try {

@@ -10,6 +10,7 @@ import { LeadForm } from './lead-form';
 import { useStore } from '@/hooks/use-store';
 import { formatCurrency, formatRelative, formatWhatsAppLink } from '@/lib/utils';
 import { applyTemplate } from '@/lib/seed';
+import { getSourceColorClasses, getStatusColorClasses, getTagColorClasses, VALUE_COLOR_CLASS } from '@/lib/lead-colors';
 import { SOURCE_LABELS, STATUS_LABELS, type Lead } from '@/types';
 
 interface LeadDetailModalProps {
@@ -72,18 +73,18 @@ export function LeadDetailModal({ lead, open, onClose }: LeadDetailModalProps) {
                   <DialogTitle className="text-xl">{lead.name}</DialogTitle>
                   <p className="text-sm text-zinc-400 mt-1">{lead.whatsapp}</p>
                 </div>
-                <Badge variant="default">{STATUS_LABELS[lead.status]}</Badge>
+                <Badge variant="outline" className={getStatusColorClasses(lead.status)}>{STATUS_LABELS[lead.status]}</Badge>
               </div>
             </DialogHeader>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
               <div className="rounded-lg bg-zinc-800/50 p-3">
                 <p className="text-xs text-zinc-500">Origem</p>
-                <p className="text-sm font-medium text-zinc-200">{SOURCE_LABELS[lead.source]}</p>
+                <Badge variant="outline" className={getSourceColorClasses(lead.source)}>{SOURCE_LABELS[lead.source]}</Badge>
               </div>
               <div className="rounded-lg bg-zinc-800/50 p-3">
                 <p className="text-xs text-zinc-500">Valor</p>
-                <p className="text-sm font-medium text-zinc-200">{formatCurrency(lead.estimated_value)}</p>
+                <p className={`text-sm ${VALUE_COLOR_CLASS}`}>{formatCurrency(lead.estimated_value)}</p>
               </div>
               <div className="rounded-lg bg-zinc-800/50 p-3">
                 <p className="text-xs text-zinc-500">Última interação</p>
@@ -94,7 +95,7 @@ export function LeadDetailModal({ lead, open, onClose }: LeadDetailModalProps) {
             {lead.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-4">
                 {lead.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary">{tag}</Badge>
+                  <Badge key={tag} variant="outline" className={getTagColorClasses(tag)}>{tag}</Badge>
                 ))}
               </div>
             )}

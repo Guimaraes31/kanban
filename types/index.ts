@@ -117,12 +117,12 @@ export const LEAD_SOURCES: { value: LeadSource; label: string }[] = [
 ];
 
 export const DEFAULT_STAGES: Omit<PipelineStage, 'id' | 'pipeline_id' | 'created_at'>[] = [
-  { name: 'Novo', slug: 'novo', color: '#fafafa', position: 0 },
-  { name: 'Em Contato', slug: 'em_contato', color: '#d4d4d8', position: 1 },
-  { name: 'Interessado', slug: 'interessado', color: '#a1a1aa', position: 2 },
-  { name: 'Proposta', slug: 'proposta', color: '#71717a', position: 3 },
-  { name: 'Fechado', slug: 'fechado', color: '#52525b', position: 4 },
-  { name: 'Perdido', slug: 'perdido', color: '#27272a', position: 5 },
+  { name: 'Novo', slug: 'novo', color: '#3b82f6', position: 0 },
+  { name: 'Em Contato', slug: 'em_contato', color: '#f59e0b', position: 1 },
+  { name: 'Interessado', slug: 'interessado', color: '#a855f7', position: 2 },
+  { name: 'Proposta', slug: 'proposta', color: '#f97316', position: 3 },
+  { name: 'Fechado', slug: 'fechado', color: '#22c55e', position: 4 },
+  { name: 'Perdido', slug: 'perdido', color: '#ef4444', position: 5 },
 ];
 
 export const STATUS_LABELS: Record<LeadStatus, string> = {

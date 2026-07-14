@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Phone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatRelative } from '@/lib/utils';
+import { getSourceColorClasses, VALUE_COLOR_CLASS } from '@/lib/lead-colors';
 import { SOURCE_LABELS, type Lead } from '@/types';
 
 interface KanbanCardProps {
@@ -52,8 +53,8 @@ export function KanbanCard({ lead, onClick, isDragging }: KanbanCardProps) {
       </div>
 
       <div className="flex items-center justify-between mt-2.5">
-        <Badge variant="outline" className="text-[10px]">{SOURCE_LABELS[lead.source]}</Badge>
-        <span className="text-xs font-medium text-zinc-100">{formatCurrency(lead.estimated_value)}</span>
+        <Badge variant="outline" className={`text-[10px] ${getSourceColorClasses(lead.source)}`}>{SOURCE_LABELS[lead.source]}</Badge>
+        <span className={`text-xs ${VALUE_COLOR_CLASS}`}>{formatCurrency(lead.estimated_value)}</span>
       </div>
 
       <p className="text-[10px] text-zinc-600 mt-2">{formatRelative(lead.last_interaction_at)}</p>
