@@ -26,7 +26,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://SEU-PROJETO.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=SUA_CHAVE_PUBLICA
 ```
 
-Execute `supabase/migrations/20260714000000_initial_schema.sql` no SQL Editor ou aplique a migration com a CLI do Supabase. A migration cria tabelas, índices, triggers e políticas RLS. Cada cadastro recebe automaticamente perfil, pipeline, etapas e templates iniciais.
+Execute, em ordem, todos os arquivos de `supabase/migrations/` no SQL Editor ou aplique as migrations com a CLI do Supabase. Elas criam e atualizam tabelas, índices, triggers e políticas RLS. Cada cadastro recebe automaticamente perfil, pipeline, etapas e templates iniciais.
 
 ## Validação
 

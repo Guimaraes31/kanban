@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'NG COMPANY',
-  description: 'CRM Simples + Funil de Leads + WhatsApp Automático para negócios locais',
+  description: 'CRM com funil de leads e follow-ups por WhatsApp para negócios locais',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

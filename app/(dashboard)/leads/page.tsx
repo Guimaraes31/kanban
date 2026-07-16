@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Search, Filter } from 'lucide-react';
+import { AlertTriangle, Plus, RefreshCw, Search, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,31 +13,59 @@ import { LeadDetailModal } from '@/components/leads/lead-detail-modal';
 import { useStore } from '@/hooks/use-store';
 import { formatCurrency, formatRelative } from '@/lib/utils';
 import { DELETE_BUTTON_CLASS, getSourceColorClasses, getStatusColorClasses, getTagColorClasses, VALUE_COLOR_CLASS } from '@/lib/lead-colors';
-import { LEAD_SOURCES, SOURCE_LABELS, STATUS_LABELS, type Lead, type LeadSource, type LeadStatus } from '@/types';
+import {
+  LEAD_CATEGORIES,
+  LEAD_SOURCES,
+  SOURCE_LABELS,
+  STATUS_LABELS,
+  type Lead,
+  type LeadCategory,
+  type LeadSource,
+  type LeadStatus,
+} from '@/types';
+
+const NO_CATEGORY_FILTER = '__no_category__' as const;
+
+function getCategoryLabel(category: LeadCategory) {
+  return LEAD_CATEGORIES.find((item) => item.value === category)?.label ?? category;
+}
 
 export default function LeadsPage() {
-  const { createLead, deleteLead, tags } = useStore();
+  const { createLead, deleteLead, tags, leads: allLeads, loading, error, refresh, getLeads } = useStore();
   const [search, setSearch] = useState('');
   const [sourceFilter, setSourceFilter] = useState<LeadSource | ''>('');
   const [statusFilter, setStatusFilter] = useState<LeadStatus | ''>('');
+  const [categoryFilter, setCategoryFilter] = useState<LeadCategory | typeof NO_CATEGORY_FILTER | ''>('');
   const [tagFilter, setTagFilter] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
-  const { getLeads } = useStore();
   const leads = getLeads({
     search: search || undefined,
     source: sourceFilter || undefined,
     status: statusFilter || undefined,
     tag: tagFilter || undefined,
+  }).filter((lead) => {
+    if (!categoryFilter) return true;
+    if (categoryFilter === NO_CATEGORY_FILTER) return !lead.category;
+    return lead.category === categoryFilter;
   });
+  const hasActiveFilters = Boolean(search || sourceFilter || statusFilter || categoryFilter || tagFilter);
+
+  const clearFilters = () => {
+    setSearch('');
+    setSourceFilter('');
+    setStatusFilter('');
+    setCategoryFilter('');
+    setTagFilter('');
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-zinc-100">Gestão de Leads</h1>
-          <p className="text-sm text-zinc-500 mt-1">{leads.length} leads encontrados</p>
+          <p className="text-sm text-zinc-500 mt-1">{loading ? 'Carregando leads...' : `${leads.length} leads encontrados`}</p>
         </div>
         <Button onClick={() => setShowCreate(true)}>
           <Plus className="h-4 w-4" />
@@ -45,29 +73,42 @@ export default function LeadsPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_repeat(4,minmax(0,10rem))]">
+        <div className="relative sm:col-span-2 xl:col-span-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
           <Input
+            aria-label="Buscar leads"
             className="pl-9"
             placeholder="Buscar por nome, WhatsApp ou email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value as LeadSource | '')} className="w-full sm:w-40">
+        <Select aria-label="Filtrar por origem" value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value as LeadSource | '')} className="w-full">
           <option value="">Todas origens</option>
           {LEAD_SOURCES.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </Select>
-        <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as LeadStatus | '')} className="w-full sm:w-40">
+        <Select aria-label="Filtrar por status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as LeadStatus | '')} className="w-full">
           <option value="">Todos status</option>
           {Object.entries(STATUS_LABELS).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
           ))}
         </Select>
-        <Select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} className="w-full sm:w-40">
+        <Select
+          aria-label="Filtrar por categoria"
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value as LeadCategory | typeof NO_CATEGORY_FILTER | '')}
+          className="w-full"
+        >
+          <option value="">Todas categorias</option>
+          <option value={NO_CATEGORY_FILTER}>Sem categoria</option>
+          {LEAD_CATEGORIES.map((item) => (
+            <option key={item.value} value={item.value}>{item.label}</option>
+          ))}
+        </Select>
+        <Select aria-label="Filtrar por tag" value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} className="w-full">
           <option value="">Todas tags</option>
           {tags.map((t) => (
             <option key={t} value={t}>{t}</option>
@@ -75,12 +116,45 @@ export default function LeadsPage() {
         </Select>
       </div>
 
-      {leads.length === 0 ? (
+      {error ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-red-500/20 bg-red-500/5 py-14 text-center">
+          <AlertTriangle className="mb-3 h-8 w-8 text-red-300" />
+          <p className="text-sm font-medium text-zinc-200">Não foi possível carregar os leads</p>
+          <p className="mt-1 max-w-md text-xs text-zinc-500">{error}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => {
+              void refresh().catch(() => undefined);
+            }}
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Tentar novamente
+          </Button>
+        </div>
+      ) : loading ? (
+        <div className="space-y-2 rounded-xl border border-zinc-800 p-3" aria-busy="true" aria-label="Carregando leads">
+          {Array.from({ length: 5 }, (_, index) => (
+            <div key={index} className="h-14 animate-pulse rounded-lg bg-zinc-900/70" />
+          ))}
+        </div>
+      ) : leads.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 rounded-xl border border-dashed border-zinc-800">
           <Filter className="h-8 w-8 text-zinc-600 mb-3" />
-          <p className="text-sm text-zinc-500">Nenhum lead encontrado</p>
-          <Button variant="outline" size="sm" className="mt-3" onClick={() => setShowCreate(true)}>
-            Criar primeiro lead
+          <p className="text-sm text-zinc-400">
+            {allLeads.length === 0 ? 'Nenhum lead cadastrado' : 'Nenhum lead corresponde aos filtros'}
+          </p>
+          <p className="mt-1 text-xs text-zinc-600">
+            {allLeads.length === 0 ? 'Cadastre seu primeiro contato para começar.' : 'Ajuste ou limpe os filtros para ver outros resultados.'}
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={allLeads.length === 0 ? () => setShowCreate(true) : clearFilters}
+          >
+            {allLeads.length === 0 ? 'Criar primeiro lead' : hasActiveFilters ? 'Limpar filtros' : 'Atualizar busca'}
           </Button>
         </div>
       ) : (
@@ -107,8 +181,16 @@ export default function LeadsPage() {
                   >
                     <td className="p-3">
                       <p className="font-medium text-zinc-200">{lead.name}</p>
-                      {lead.tags.length > 0 && (
-                        <div className="flex gap-1 mt-1">
+                      {(lead.category || lead.tags.length > 0) && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {lead.category && (
+                            <Badge
+                              variant="outline"
+                              className="border-cyan-500/30 bg-cyan-500/10 text-[10px] text-cyan-300"
+                            >
+                              {getCategoryLabel(lead.category)}
+                            </Badge>
+                          )}
                           {lead.tags.slice(0, 2).map((t) => (
                             <Badge key={t} variant="outline" className={`text-[10px] ${getTagColorClasses(t)}`}>{t}</Badge>
                           ))}
@@ -124,8 +206,19 @@ export default function LeadsPage() {
                     </td>
                     <td className={`p-3 hidden lg:table-cell ${VALUE_COLOR_CLASS}`}>{formatCurrency(lead.estimated_value)}</td>
                     <td className="p-3 text-zinc-500 text-xs hidden lg:table-cell">{formatRelative(lead.last_interaction_at)}</td>
-                    <td className="p-3 text-right">
-                      <Button
+                    <td className="p-3">
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setSelectedLead(lead);
+                          }}
+                        >
+                          Abrir
+                        </Button>
+                        <Button
                         variant="ghost"
                         size="sm"
                         className={DELETE_BUTTON_CLASS}
@@ -140,7 +233,8 @@ export default function LeadsPage() {
                         }}
                       >
                         Excluir
-                      </Button>
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

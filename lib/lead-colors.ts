@@ -1,4 +1,4 @@
-import type { LeadSource, LeadStatus } from '@/types';
+import type { LeadCategory, LeadSource, LeadStatus } from '@/types';
 
 export const VALUE_COLOR_CLASS = 'text-emerald-400 font-medium';
 export const DELETE_BUTTON_CLASS = 'text-red-500 hover:text-red-400 hover:bg-red-500/10';
@@ -6,6 +6,7 @@ export const DELETE_BUTTON_CLASS = 'text-red-500 hover:text-red-400 hover:bg-red
 export const STATUS_DOT_COLORS: Record<LeadStatus, string> = {
   novo: '#3b82f6',
   em_contato: '#f59e0b',
+  recap: '#06b6d4',
   interessado: '#a855f7',
   proposta: '#f97316',
   fechado: '#22c55e',
@@ -15,6 +16,7 @@ export const STATUS_DOT_COLORS: Record<LeadStatus, string> = {
 export const STATUS_COLORS: Record<LeadStatus, string> = {
   novo: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
   em_contato: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  recap: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
   interessado: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
   proposta: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
   fechado: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
@@ -26,7 +28,12 @@ export const SOURCE_COLORS: Record<LeadSource, string> = {
   site: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
   indicacao: 'bg-teal-500/20 text-teal-400 border-teal-500/30',
   whatsapp: 'bg-green-500/20 text-green-400 border-green-500/30',
+  google_maps: 'bg-red-500/20 text-red-400 border-red-500/30',
   outro: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30',
+};
+
+export const CATEGORY_COLORS: Record<LeadCategory, string> = {
+  links: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
 };
 
 const TAG_COLORS = [
@@ -48,6 +55,10 @@ export function getStatusDotColor(status: LeadStatus | string, fallback = '#a1a1
 
 export function getSourceColorClasses(source: LeadSource): string {
   return SOURCE_COLORS[source];
+}
+
+export function getCategoryColorClasses(category: LeadCategory): string {
+  return CATEGORY_COLORS[category];
 }
 
 export function getTagColorClasses(tag: string): string {

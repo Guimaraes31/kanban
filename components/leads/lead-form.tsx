@@ -1,12 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { LEAD_SOURCES, type Lead, type LeadSource, type LeadStatus } from '@/types';
+import {
+  LEAD_CATEGORIES,
+  LEAD_SOURCES,
+  STATUS_LABELS,
+  type Lead,
+  type LeadCategory,
+  type LeadSource,
+  type LeadStatus,
+} from '@/types';
 
 interface LeadFormProps {
   initial?: Partial<Lead>;
@@ -15,6 +23,7 @@ interface LeadFormProps {
     whatsapp: string;
     email?: string;
     source: LeadSource;
+    category: LeadCategory | null;
     status: LeadStatus;
     estimated_value: number;
     notes?: string;
@@ -24,12 +33,14 @@ interface LeadFormProps {
 }
 
 export function LeadForm({ initial, onSubmit, onCancel }: LeadFormProps) {
+  const formId = useId();
   const [name, setName] = useState(initial?.name || '');
   const [whatsapp, setWhatsapp] = useState(initial?.whatsapp || '');
   const [email, setEmail] = useState(initial?.email || '');
   const [source, setSource] = useState<LeadSource>(initial?.source || 'instagram');
+  const [category, setCategory] = useState<LeadCategory | ''>(initial?.category || '');
   const [status, setStatus] = useState<LeadStatus>(initial?.status || 'novo');
-  const [value, setValue] = useState(String(initial?.estimated_value || 899));
+  const [value, setValue] = useState(String(initial?.estimated_value ?? 899));
   const [notes, setNotes] = useState(initial?.notes || '');
   const [tags, setTags] = useState(initial?.tags?.join(', ') || '');
 
@@ -41,6 +52,7 @@ export function LeadForm({ initial, onSubmit, onCancel }: LeadFormProps) {
       whatsapp: whatsapp.trim(),
       email: email.trim() || undefined,
       source,
+      category: category || null,
       status,
       estimated_value: parseFloat(value) || 0,
       notes: notes.trim() || undefined,
@@ -52,48 +64,54 @@ export function LeadForm({ initial, onSubmit, onCancel }: LeadFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Nome *</Label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo" required />
+          <Label htmlFor={`${formId}-name`}>Nome *</Label>
+          <Input id={`${formId}-name`} value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo" required />
         </div>
         <div className="space-y-2">
-          <Label>WhatsApp *</Label>
-          <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="11999999999" required />
+          <Label htmlFor={`${formId}-whatsapp`}>WhatsApp *</Label>
+          <Input id={`${formId}-whatsapp`} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="11999999999" required />
         </div>
         <div className="space-y-2">
-          <Label>Email</Label>
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemplo.com" />
+          <Label htmlFor={`${formId}-email`}>Email</Label>
+          <Input id={`${formId}-email`} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemplo.com" />
         </div>
         <div className="space-y-2">
-          <Label>Origem</Label>
-          <Select value={source} onChange={(e) => setSource(e.target.value as LeadSource)}>
+          <Label htmlFor={`${formId}-source`}>Origem</Label>
+          <Select id={`${formId}-source`} value={source} onChange={(e) => setSource(e.target.value as LeadSource)}>
             {LEAD_SOURCES.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Status</Label>
-          <Select value={status} onChange={(e) => setStatus(e.target.value as LeadStatus)}>
-            <option value="novo">Novo</option>
-            <option value="em_contato">Em Contato</option>
-            <option value="interessado">Interessado</option>
-            <option value="proposta">Proposta</option>
-            <option value="fechado">Fechado</option>
-            <option value="perdido">Perdido</option>
+          <Label htmlFor={`${formId}-category`}>Categoria</Label>
+          <Select id={`${formId}-category`} value={category} onChange={(e) => setCategory(e.target.value as LeadCategory | '')}>
+            <option value="">Sem categoria</option>
+            {LEAD_CATEGORIES.map((item) => (
+              <option key={item.value} value={item.value}>{item.label}</option>
+            ))}
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Valor Estimado (R$)</Label>
-          <Input type="number" value={value} onChange={(e) => setValue(e.target.value)} min="0" step="0.01" />
+          <Label htmlFor={`${formId}-status`}>Status</Label>
+          <Select id={`${formId}-status`} value={status} onChange={(e) => setStatus(e.target.value as LeadStatus)}>
+            {Object.entries(STATUS_LABELS).map(([key, label]) => (
+              <option key={key} value={key}>{label}</option>
+            ))}
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor={`${formId}-value`}>Valor Estimado (R$)</Label>
+          <Input id={`${formId}-value`} type="number" value={value} onChange={(e) => setValue(e.target.value)} min="0" step="0.01" />
         </div>
       </div>
       <div className="space-y-2">
-        <Label>Tags (separadas por vírgula)</Label>
-        <Input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="promo-verao, vip" />
+        <Label htmlFor={`${formId}-tags`}>Tags (separadas por vírgula)</Label>
+        <Input id={`${formId}-tags`} value={tags} onChange={(e) => setTags(e.target.value)} placeholder="promo-verao, vip" />
       </div>
       <div className="space-y-2">
-        <Label>Observações</Label>
-        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notas sobre o lead..." rows={3} />
+        <Label htmlFor={`${formId}-notes`}>Observações</Label>
+        <Textarea id={`${formId}-notes`} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notas sobre o lead..." rows={3} />
       </div>
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>

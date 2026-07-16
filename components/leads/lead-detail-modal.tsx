@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageCircle, Clock } from 'lucide-react';
+import { MessageCircle, Clock, LoaderCircle, Tag, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -19,32 +19,66 @@ interface LeadDetailModalProps {
   onClose: () => void;
 }
 
-export function LeadDetailModal({ lead, open, onClose }: LeadDetailModalProps) {
-  const { getActivities, updateLead, addActivity, templates, scheduleFollowUp } = useStore();
+export function LeadDetailModal({ lead: leadProp, open, onClose }: LeadDetailModalProps) {
+  const { getLeadById, getActivities, updateLead, addActivity, templates, scheduleFollowUp } = useStore();
   const [editing, setEditing] = useState(false);
+  const [scheduling, setScheduling] = useState<'1h' | '1d' | null>(null);
+  const [openedWhatsAppLeadId, setOpenedWhatsAppLeadId] = useState<string | null>(null);
+  const [confirmingWhatsApp, setConfirmingWhatsApp] = useState(false);
 
-  if (!lead) return null;
+  if (!leadProp) return null;
+
+  const lead = getLeadById(leadProp.id) ?? leadProp;
 
   const activities = getActivities(lead.id);
   const welcomeTemplate = templates.find((t) => t.category === 'welcome');
 
-  const handleWhatsApp = async () => {
+  const handleWhatsApp = () => {
     const message = welcomeTemplate
       ? applyTemplate(welcomeTemplate.content, lead.name)
       : `Olá ${lead.name.split(' ')[0]}! Como posso ajudar?`;
-    navigator.clipboard.writeText(message);
-    toast.success('Mensagem copiada! Abrindo WhatsApp...');
-    await addActivity(lead.id, 'whatsapp_sent', 'Mensagem enviada', message);
-    window.open(formatWhatsAppLink(lead.whatsapp, message), '_blank');
+    window.open(formatWhatsAppLink(lead.whatsapp, message), '_blank', 'noopener,noreferrer');
+    void navigator.clipboard?.writeText(message).catch(() => undefined);
+    setOpenedWhatsAppLeadId(lead.id);
+    toast.success('WhatsApp aberto. Confirme o envio ao voltar.');
   };
 
-  const handleFollowUp = async (delay: '1h' | '1d' | '3d') => {
-    const tpl = templates.find((t) => t.name.toLowerCase().includes(delay === '1h' ? '1 hora' : delay === '1d' ? '1 dia' : '3 dia'))
-      || templates.find((t) => t.category === 'followup');
-    if (!tpl) return;
-    const content = applyTemplate(tpl.content, lead.name);
-    await scheduleFollowUp(lead.id, tpl.id, content, delay);
-    toast.success(`Follow-up de ${delay} agendado!`);
+  const handleConfirmWhatsApp = async () => {
+    const message = welcomeTemplate
+      ? applyTemplate(welcomeTemplate.content, lead.name)
+      : `Olá ${lead.name.split(' ')[0]}! Como posso ajudar?`;
+    setConfirmingWhatsApp(true);
+    try {
+      await addActivity(lead.id, 'whatsapp_sent', 'Mensagem enviada', message);
+      setOpenedWhatsAppLeadId(null);
+      toast.success('Envio registrado no histórico!');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível registrar o envio');
+    } finally {
+      setConfirmingWhatsApp(false);
+    }
+  };
+
+  const handleFollowUp = async (delay: '1h' | '1d') => {
+    const templateLabel = delay === '1h' ? '1 hora' : '1 dia';
+    const tpl = templates.find((template) =>
+      template.category === 'followup' && template.name.toLowerCase().includes(templateLabel)
+    );
+    if (!tpl) {
+      toast.error(`Template “Follow-up ${templateLabel}” não encontrado. Crie-o em Configurações.`);
+      return;
+    }
+
+    setScheduling(delay);
+    try {
+      const content = applyTemplate(tpl.content, lead.name);
+      await scheduleFollowUp(lead.id, tpl.id, content, delay);
+      toast.success(`Follow-up de ${templateLabel} agendado!`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível agendar o follow-up');
+    } finally {
+      setScheduling(null);
+    }
   };
 
   return (
@@ -77,7 +111,7 @@ export function LeadDetailModal({ lead, open, onClose }: LeadDetailModalProps) {
               </div>
             </DialogHeader>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
               <div className="rounded-lg bg-zinc-800/50 p-3">
                 <p className="text-xs text-zinc-500">Origem</p>
                 <Badge variant="outline" className={getSourceColorClasses(lead.source)}>{SOURCE_LABELS[lead.source]}</Badge>
@@ -89,6 +123,13 @@ export function LeadDetailModal({ lead, open, onClose }: LeadDetailModalProps) {
               <div className="rounded-lg bg-zinc-800/50 p-3">
                 <p className="text-xs text-zinc-500">Última interação</p>
                 <p className="text-sm font-medium text-zinc-200">{formatRelative(lead.last_interaction_at)}</p>
+              </div>
+              <div className="rounded-lg bg-zinc-800/50 p-3">
+                <p className="text-xs text-zinc-500">Categoria</p>
+                <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-zinc-200">
+                  <Tag className="h-3.5 w-3.5 text-cyan-400" />
+                  {lead.category === 'links' ? 'Links' : 'Sem categoria'}
+                </p>
               </div>
             </div>
 
@@ -110,22 +151,28 @@ export function LeadDetailModal({ lead, open, onClose }: LeadDetailModalProps) {
             <div className="flex flex-wrap gap-2 mb-5">
               <Button size="sm" onClick={handleWhatsApp}>
                 <MessageCircle className="h-4 w-4" />
-                Enviar WhatsApp
+                {openedWhatsAppLeadId === lead.id ? 'Reabrir WhatsApp' : 'Enviar WhatsApp'}
               </Button>
-              <Button size="sm" variant="outline" onClick={() => handleFollowUp('1h')}>
-                <Clock className="h-4 w-4" />
+              {openedWhatsAppLeadId === lead.id && (
+                <Button size="sm" variant="secondary" disabled={confirmingWhatsApp} onClick={handleConfirmWhatsApp}>
+                  <CheckCircle className="h-4 w-4" />
+                  {confirmingWhatsApp ? 'Registrando...' : 'Confirmar envio'}
+                </Button>
+              )}
+              <Button size="sm" variant="outline" disabled={scheduling !== null} onClick={() => handleFollowUp('1h')}>
+                {scheduling === '1h' ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Clock className="h-4 w-4" />}
                 Follow-up 1h
               </Button>
-              <Button size="sm" variant="outline" onClick={() => handleFollowUp('1d')}>
-                <Clock className="h-4 w-4" />
+              <Button size="sm" variant="outline" disabled={scheduling !== null} onClick={() => handleFollowUp('1d')}>
+                {scheduling === '1d' ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Clock className="h-4 w-4" />}
                 Follow-up 1d
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => handleFollowUp('3d')}>
-                <Clock className="h-4 w-4" />
-                Follow-up 3d
               </Button>
               <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>Editar</Button>
             </div>
+
+            <p className="-mt-3 mb-5 text-xs text-zinc-500">
+              Os follow-ups ficam disponíveis na área WhatsApp quando chegar o horário.
+            </p>
 
             <div>
               <h4 className="text-sm font-medium text-zinc-300 mb-3">Histórico de Interações</h4>

@@ -1,8 +1,11 @@
-export type LeadSource = 'instagram' | 'site' | 'indicacao' | 'whatsapp' | 'outro';
+export type LeadSource = 'instagram' | 'site' | 'indicacao' | 'whatsapp' | 'google_maps' | 'outro';
+
+export type LeadCategory = 'links';
 
 export type LeadStatus =
   | 'novo'
   | 'em_contato'
+  | 'recap'
   | 'interessado'
   | 'proposta'
   | 'fechado'
@@ -55,6 +58,7 @@ export interface Lead {
   whatsapp: string;
   email?: string;
   source: LeadSource;
+  category?: LeadCategory | null;
   status: LeadStatus;
   estimated_value: number;
   notes?: string;
@@ -90,7 +94,7 @@ export interface ScheduledMessage {
   id: string;
   lead_id: string;
   user_id: string;
-  template_id: string;
+  template_id: string | null;
   content: string;
   scheduled_for: string;
   delay: FollowUpDelay;
@@ -113,21 +117,28 @@ export const LEAD_SOURCES: { value: LeadSource; label: string }[] = [
   { value: 'site', label: 'Site' },
   { value: 'indicacao', label: 'Indicação' },
   { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'google_maps', label: 'Google Maps' },
   { value: 'outro', label: 'Outro' },
+];
+
+export const LEAD_CATEGORIES: { value: LeadCategory; label: string }[] = [
+  { value: 'links', label: 'Links' },
 ];
 
 export const DEFAULT_STAGES: Omit<PipelineStage, 'id' | 'pipeline_id' | 'created_at'>[] = [
   { name: 'Novo', slug: 'novo', color: '#3b82f6', position: 0 },
   { name: 'Em Contato', slug: 'em_contato', color: '#f59e0b', position: 1 },
-  { name: 'Interessado', slug: 'interessado', color: '#a855f7', position: 2 },
-  { name: 'Proposta', slug: 'proposta', color: '#f97316', position: 3 },
-  { name: 'Fechado', slug: 'fechado', color: '#22c55e', position: 4 },
-  { name: 'Perdido', slug: 'perdido', color: '#ef4444', position: 5 },
+  { name: 'Recap', slug: 'recap', color: '#06b6d4', position: 2 },
+  { name: 'Interessado', slug: 'interessado', color: '#a855f7', position: 3 },
+  { name: 'Proposta', slug: 'proposta', color: '#f97316', position: 4 },
+  { name: 'Fechado', slug: 'fechado', color: '#22c55e', position: 5 },
+  { name: 'Perdido', slug: 'perdido', color: '#ef4444', position: 6 },
 ];
 
 export const STATUS_LABELS: Record<LeadStatus, string> = {
   novo: 'Novo',
   em_contato: 'Em Contato',
+  recap: 'Recap',
   interessado: 'Interessado',
   proposta: 'Proposta',
   fechado: 'Fechado',
@@ -139,5 +150,10 @@ export const SOURCE_LABELS: Record<LeadSource, string> = {
   site: 'Site',
   indicacao: 'Indicação',
   whatsapp: 'WhatsApp',
+  google_maps: 'Google Maps',
   outro: 'Outro',
+};
+
+export const CATEGORY_LABELS: Record<LeadCategory, string> = {
+  links: 'Links',
 };

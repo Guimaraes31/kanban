@@ -17,10 +17,11 @@ BEGIN
   INSERT INTO pipeline_stages (pipeline_id, name, slug, color, position) VALUES
     (v_pipeline_id, 'Novo', 'novo', '#3b82f6', 0),
     (v_pipeline_id, 'Em Contato', 'em_contato', '#f59e0b', 1),
-    (v_pipeline_id, 'Interessado', 'interessado', '#a855f7', 2),
-    (v_pipeline_id, 'Proposta', 'proposta', '#f97316', 3),
-    (v_pipeline_id, 'Fechado', 'fechado', '#22c55e', 4),
-    (v_pipeline_id, 'Perdido', 'perdido', '#ef4444', 5);
+    (v_pipeline_id, 'Recap', 'recap', '#06b6d4', 2),
+    (v_pipeline_id, 'Interessado', 'interessado', '#a855f7', 3),
+    (v_pipeline_id, 'Proposta', 'proposta', '#f97316', 4),
+    (v_pipeline_id, 'Fechado', 'fechado', '#22c55e', 5),
+    (v_pipeline_id, 'Perdido', 'perdido', '#ef4444', 6);
 
   -- Templates
   INSERT INTO message_templates (user_id, name, content, category, is_default) VALUES
@@ -52,5 +53,10 @@ BEGIN
     (v_user_id, 'Vanessa Almeida', '11910988901', 'vanessa@email.com', 'indicacao', 'interessado', 1078.80, 'Quer plano para casal', ARRAY['casal']),
     (v_user_id, 'Felipe Gomes', '11909879012', NULL, 'site', 'proposta', 899.00, 'Empresa quer plano corporativo', ARRAY['corporativo']),
     (v_user_id, 'Mariana Dias', '11998760123', 'mari@email.com', 'instagram', 'novo', 1078.80, 'Micro-influencer fitness', ARRAY['influencer']);
+
+  -- Exemplo das novas dimensões de classificação.
+  UPDATE leads
+  SET source = 'google_maps', status = 'recap', category = 'links'
+  WHERE user_id = v_user_id AND name = 'Marcos Pereira';
 
 END $$;
