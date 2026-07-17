@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageCircle, Clock, LoaderCircle, ExternalLink, CheckCircle } from 'lucide-react';
+import { MessageCircle, ExternalLink, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -20,9 +20,8 @@ interface LeadDetailModalProps {
 }
 
 export function LeadDetailModal({ lead: leadProp, open, onClose }: LeadDetailModalProps) {
-  const { getLeadById, getActivities, updateLead, addActivity, templates, scheduleFollowUp } = useStore();
+  const { getLeadById, getActivities, updateLead, addActivity, templates } = useStore();
   const [editing, setEditing] = useState(false);
-  const [scheduling, setScheduling] = useState<'1h' | '1d' | null>(null);
   const [openedWhatsAppLeadId, setOpenedWhatsAppLeadId] = useState<string | null>(null);
   const [confirmingWhatsApp, setConfirmingWhatsApp] = useState(false);
 
@@ -57,28 +56,6 @@ export function LeadDetailModal({ lead: leadProp, open, onClose }: LeadDetailMod
       toast.error(error instanceof Error ? error.message : 'Não foi possível registrar o envio');
     } finally {
       setConfirmingWhatsApp(false);
-    }
-  };
-
-  const handleFollowUp = async (delay: '1h' | '1d') => {
-    const templateLabel = delay === '1h' ? '1 hora' : '1 dia';
-    const tpl = templates.find((template) =>
-      template.category === 'followup' && template.name.toLowerCase().includes(templateLabel)
-    );
-    if (!tpl) {
-      toast.error(`Template “Follow-up ${templateLabel}” não encontrado. Crie-o em Configurações.`);
-      return;
-    }
-
-    setScheduling(delay);
-    try {
-      const content = applyTemplate(tpl.content, lead.name);
-      await scheduleFollowUp(lead.id, tpl.id, content, delay);
-      toast.success(`Follow-up de ${templateLabel} agendado!`);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Não foi possível agendar o follow-up');
-    } finally {
-      setScheduling(null);
     }
   };
 
@@ -183,20 +160,8 @@ export function LeadDetailModal({ lead: leadProp, open, onClose }: LeadDetailMod
                   {confirmingWhatsApp ? 'Registrando...' : 'Confirmar envio'}
                 </Button>
               )}
-              <Button size="sm" variant="outline" disabled={scheduling !== null} onClick={() => handleFollowUp('1h')}>
-                {scheduling === '1h' ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Clock className="h-4 w-4" />}
-                Follow-up 1h
-              </Button>
-              <Button size="sm" variant="outline" disabled={scheduling !== null} onClick={() => handleFollowUp('1d')}>
-                {scheduling === '1d' ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Clock className="h-4 w-4" />}
-                Follow-up 1d
-              </Button>
               <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>Editar</Button>
             </div>
-
-            <p className="-mt-3 mb-5 text-xs text-zinc-500">
-              Os follow-ups ficam disponíveis na área WhatsApp quando chegar o horário.
-            </p>
 
             <div>
               <h4 className="text-sm font-medium text-zinc-300 mb-3">Histórico de Interações</h4>
