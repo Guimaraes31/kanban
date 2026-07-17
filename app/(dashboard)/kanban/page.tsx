@@ -11,7 +11,7 @@ export default function KanbanPage() {
       <div>
         <h1 className="text-2xl font-bold text-zinc-100">Funil de Leads</h1>
         <p className="text-sm text-zinc-500 mt-1">
-          Arraste os cards entre as colunas · {leads.length} leads no funil
+          Arraste o card para mudar a etapa · arraste o fundo ou use a roda do mouse para rolar · {leads.length} leads no funil
         </p>
       </div>
       <KanbanBoard />

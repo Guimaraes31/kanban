@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Phone } from 'lucide-react';
@@ -14,26 +15,9 @@ interface KanbanCardProps {
   isDragging?: boolean;
 }
 
-export function KanbanCard({ lead, onClick, isDragging }: KanbanCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging: isSortDragging } = useSortable({
-    id: lead.id,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isSortDragging ? 0.5 : 1,
-  };
-
+function CardBody({ lead }: { lead: Lead }) {
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`group rounded-lg border border-zinc-800 bg-zinc-900 p-3 cursor-pointer hover:border-zinc-700 hover:bg-zinc-800/80 transition-all ${
-        isDragging ? 'shadow-xl border-white/50' : ''
-      }`}
-      onClick={onClick}
-    >
+    <>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-zinc-100 truncate">{lead.name}</p>
@@ -42,14 +26,9 @@ export function KanbanCard({ lead, onClick, isDragging }: KanbanCardProps) {
             <span>{lead.whatsapp}</span>
           </div>
         </div>
-        <button
-          className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-zinc-400 transition-opacity cursor-grab active:cursor-grabbing"
-          {...attributes}
-          {...listeners}
-          onClick={(e) => e.stopPropagation()}
-        >
+        <span className="text-zinc-600 group-hover:text-zinc-400 transition-colors" aria-hidden>
           <GripVertical className="h-4 w-4" />
-        </button>
+        </span>
       </div>
 
       <div className="flex items-center justify-between mt-2.5">
@@ -58,6 +37,60 @@ export function KanbanCard({ lead, onClick, isDragging }: KanbanCardProps) {
       </div>
 
       <p className="text-[10px] text-zinc-600 mt-2">{formatRelative(lead.last_interaction_at)}</p>
+    </>
+  );
+}
+
+/** Versão visual do card (overlay de drag — sem sortable). */
+export function KanbanCardPreview({ lead }: { lead: Lead }) {
+  return (
+    <div
+      data-kanban-card
+      className="group rounded-lg border border-white/50 bg-zinc-900 p-3 shadow-xl ring-1 ring-white/20 cursor-grabbing"
+    >
+      <CardBody lead={lead} />
+    </div>
+  );
+}
+
+export function KanbanCard({ lead, onClick, isDragging }: KanbanCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging: isSortDragging } = useSortable({
+    id: lead.id,
+    disabled: Boolean(isDragging),
+  });
+  const suppressClickRef = useRef(false);
+
+  useEffect(() => {
+    if (isSortDragging) {
+      suppressClickRef.current = true;
+    }
+  }, [isSortDragging]);
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isSortDragging ? 0.35 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      data-kanban-card
+      className={`group touch-none rounded-lg border border-zinc-800 bg-zinc-900 p-3 cursor-grab active:cursor-grabbing hover:border-zinc-700 hover:bg-zinc-800/80 transition-colors ${
+        isDragging || isSortDragging ? 'shadow-xl border-white/50 ring-1 ring-white/20' : ''
+      }`}
+      onClick={() => {
+        if (suppressClickRef.current) {
+          suppressClickRef.current = false;
+          return;
+        }
+        onClick();
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <CardBody lead={lead} />
     </div>
   );
 }

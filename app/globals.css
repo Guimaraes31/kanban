@@ -26,3 +26,8 @@ body {
 html {
   color-scheme: dark;
 }
+
+/* Evita scroll-snap/smooth atrapalhando pan e drag no funil */
+.scroll-smooth-none {
+  scroll-behavior: auto;
+}
