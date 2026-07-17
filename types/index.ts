@@ -1,7 +1,5 @@
 export type LeadSource = 'instagram' | 'site' | 'indicacao' | 'whatsapp' | 'google_maps' | 'outro';
 
-export type LeadCategory = 'links';
-
 export type LeadStatus =
   | 'novo'
   | 'em_contato'
@@ -58,7 +56,7 @@ export interface Lead {
   whatsapp: string;
   email?: string;
   source: LeadSource;
-  category?: LeadCategory | null;
+  link?: string | null;
   status: LeadStatus;
   estimated_value: number;
   notes?: string;
@@ -121,10 +119,6 @@ export const LEAD_SOURCES: { value: LeadSource; label: string }[] = [
   { value: 'outro', label: 'Outro' },
 ];
 
-export const LEAD_CATEGORIES: { value: LeadCategory; label: string }[] = [
-  { value: 'links', label: 'Links' },
-];
-
 export const DEFAULT_STAGES: Omit<PipelineStage, 'id' | 'pipeline_id' | 'created_at'>[] = [
   { name: 'Novo', slug: 'novo', color: '#3b82f6', position: 0 },
   { name: 'Em Contato', slug: 'em_contato', color: '#f59e0b', position: 1 },
@@ -154,6 +148,3 @@ export const SOURCE_LABELS: Record<LeadSource, string> = {
   outro: 'Outro',
 };
 
-export const CATEGORY_LABELS: Record<LeadCategory, string> = {
-  links: 'Links',
-};

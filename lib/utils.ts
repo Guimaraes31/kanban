@@ -29,6 +29,14 @@ export function formatWhatsAppLink(phone: string, message?: string): string {
   return `https://wa.me/${number}${encoded}`;
 }
 
+/** Normaliza texto colado no campo de link do lead (opcional). */
+export function normalizeLeadLink(value?: string | null): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 export function getLast7Days(): string[] {
   return Array.from({ length: 7 }, (_, i) => {
     const d = subDays(new Date(), 6 - i);

@@ -2,26 +2,13 @@
 ALTER TYPE lead_status ADD VALUE IF NOT EXISTS 'recap' AFTER 'em_contato';
 ALTER TYPE lead_source ADD VALUE IF NOT EXISTS 'google_maps';
 
+-- Campo livre para colar link do lead (Maps, Instagram, site, etc.).
 ALTER TABLE leads
-  ADD COLUMN IF NOT EXISTS category TEXT;
+  ADD COLUMN IF NOT EXISTS link TEXT;
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1
-    FROM pg_constraint
-    WHERE conname = 'leads_category_check'
-      AND conrelid = 'leads'::regclass
-  ) THEN
-    ALTER TABLE leads
-      ADD CONSTRAINT leads_category_check
-      CHECK (category IS NULL OR category IN ('links'));
-  END IF;
-END $$;
-
-CREATE INDEX IF NOT EXISTS idx_leads_user_category
-  ON leads(user_id, category)
-  WHERE category IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_leads_user_link
+  ON leads(user_id)
+  WHERE link IS NOT NULL AND btrim(link) <> '';
 
 -- Adiciona Recap entre Em Contato e Interessado sem duplicar a etapa.
 DO $$

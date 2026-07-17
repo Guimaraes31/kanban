@@ -6,12 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { normalizeLeadLink } from '@/lib/utils';
 import {
-  LEAD_CATEGORIES,
   LEAD_SOURCES,
   STATUS_LABELS,
   type Lead,
-  type LeadCategory,
   type LeadSource,
   type LeadStatus,
 } from '@/types';
@@ -23,7 +22,7 @@ interface LeadFormProps {
     whatsapp: string;
     email?: string;
     source: LeadSource;
-    category: LeadCategory | null;
+    link: string | null;
     status: LeadStatus;
     estimated_value: number;
     notes?: string;
@@ -38,7 +37,7 @@ export function LeadForm({ initial, onSubmit, onCancel }: LeadFormProps) {
   const [whatsapp, setWhatsapp] = useState(initial?.whatsapp || '');
   const [email, setEmail] = useState(initial?.email || '');
   const [source, setSource] = useState<LeadSource>(initial?.source || 'instagram');
-  const [category, setCategory] = useState<LeadCategory | ''>(initial?.category || '');
+  const [link, setLink] = useState(initial?.link || '');
   const [status, setStatus] = useState<LeadStatus>(initial?.status || 'novo');
   const [value, setValue] = useState(String(initial?.estimated_value ?? 899));
   const [notes, setNotes] = useState(initial?.notes || '');
@@ -52,7 +51,7 @@ export function LeadForm({ initial, onSubmit, onCancel }: LeadFormProps) {
       whatsapp: whatsapp.trim(),
       email: email.trim() || undefined,
       source,
-      category: category || null,
+      link: normalizeLeadLink(link),
       status,
       estimated_value: parseFloat(value) || 0,
       notes: notes.trim() || undefined,
@@ -84,15 +83,6 @@ export function LeadForm({ initial, onSubmit, onCancel }: LeadFormProps) {
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor={`${formId}-category`}>Categoria</Label>
-          <Select id={`${formId}-category`} value={category} onChange={(e) => setCategory(e.target.value as LeadCategory | '')}>
-            <option value="">Sem categoria</option>
-            {LEAD_CATEGORIES.map((item) => (
-              <option key={item.value} value={item.value}>{item.label}</option>
-            ))}
-          </Select>
-        </div>
-        <div className="space-y-2">
           <Label htmlFor={`${formId}-status`}>Status</Label>
           <Select id={`${formId}-status`} value={status} onChange={(e) => setStatus(e.target.value as LeadStatus)}>
             {Object.entries(STATUS_LABELS).map(([key, label]) => (
@@ -104,6 +94,18 @@ export function LeadForm({ initial, onSubmit, onCancel }: LeadFormProps) {
           <Label htmlFor={`${formId}-value`}>Valor Estimado (R$)</Label>
           <Input id={`${formId}-value`} type="number" value={value} onChange={(e) => setValue(e.target.value)} min="0" step="0.01" />
         </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor={`${formId}-link`}>Link</Label>
+        <Input
+          id={`${formId}-link`}
+          type="text"
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+          placeholder="Cole o link aqui (Google Maps, Instagram, site...)"
+          inputMode="url"
+          autoComplete="url"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor={`${formId}-tags`}>Tags (separadas por vírgula)</Label>

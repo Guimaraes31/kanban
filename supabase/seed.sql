@@ -54,9 +54,12 @@ BEGIN
     (v_user_id, 'Felipe Gomes', '11909879012', NULL, 'site', 'proposta', 899.00, 'Empresa quer plano corporativo', ARRAY['corporativo']),
     (v_user_id, 'Mariana Dias', '11998760123', 'mari@email.com', 'instagram', 'novo', 1078.80, 'Micro-influencer fitness', ARRAY['influencer']);
 
-  -- Exemplo das novas dimensões de classificação.
+  -- Exemplo com origem Maps + etapa Recap + link colado.
   UPDATE leads
-  SET source = 'google_maps', status = 'recap', category = 'links'
+  SET
+    source = 'google_maps',
+    status = 'recap',
+    link = 'https://maps.google.com/?q=PowerGym'
   WHERE user_id = v_user_id AND name = 'Marcos Pereira';
 
 END $$;

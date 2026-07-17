@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, Plus, RefreshCw, Search, Filter } from 'lucide-react';
+import { AlertTriangle, ExternalLink, Plus, RefreshCw, Search, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,31 +11,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { LeadForm } from '@/components/leads/lead-form';
 import { LeadDetailModal } from '@/components/leads/lead-detail-modal';
 import { useStore } from '@/hooks/use-store';
-import { formatCurrency, formatRelative } from '@/lib/utils';
+import { formatCurrency, formatRelative, normalizeLeadLink } from '@/lib/utils';
 import { DELETE_BUTTON_CLASS, getSourceColorClasses, getStatusColorClasses, getTagColorClasses, VALUE_COLOR_CLASS } from '@/lib/lead-colors';
 import {
-  LEAD_CATEGORIES,
   LEAD_SOURCES,
   SOURCE_LABELS,
   STATUS_LABELS,
   type Lead,
-  type LeadCategory,
   type LeadSource,
   type LeadStatus,
 } from '@/types';
-
-const NO_CATEGORY_FILTER = '__no_category__' as const;
-
-function getCategoryLabel(category: LeadCategory) {
-  return LEAD_CATEGORIES.find((item) => item.value === category)?.label ?? category;
-}
 
 export default function LeadsPage() {
   const { createLead, deleteLead, tags, leads: allLeads, loading, error, refresh, getLeads } = useStore();
   const [search, setSearch] = useState('');
   const [sourceFilter, setSourceFilter] = useState<LeadSource | ''>('');
   const [statusFilter, setStatusFilter] = useState<LeadStatus | ''>('');
-  const [categoryFilter, setCategoryFilter] = useState<LeadCategory | typeof NO_CATEGORY_FILTER | ''>('');
   const [tagFilter, setTagFilter] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -45,18 +36,13 @@ export default function LeadsPage() {
     source: sourceFilter || undefined,
     status: statusFilter || undefined,
     tag: tagFilter || undefined,
-  }).filter((lead) => {
-    if (!categoryFilter) return true;
-    if (categoryFilter === NO_CATEGORY_FILTER) return !lead.category;
-    return lead.category === categoryFilter;
   });
-  const hasActiveFilters = Boolean(search || sourceFilter || statusFilter || categoryFilter || tagFilter);
+  const hasActiveFilters = Boolean(search || sourceFilter || statusFilter || tagFilter);
 
   const clearFilters = () => {
     setSearch('');
     setSourceFilter('');
     setStatusFilter('');
-    setCategoryFilter('');
     setTagFilter('');
   };
 
@@ -73,13 +59,13 @@ export default function LeadsPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_repeat(4,minmax(0,10rem))]">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(16rem,1fr)_repeat(3,minmax(0,10rem))]">
         <div className="relative sm:col-span-2 xl:col-span-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
           <Input
             aria-label="Buscar leads"
             className="pl-9"
-            placeholder="Buscar por nome, WhatsApp ou email..."
+            placeholder="Buscar por nome, WhatsApp, email ou link..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -94,18 +80,6 @@ export default function LeadsPage() {
           <option value="">Todos status</option>
           {Object.entries(STATUS_LABELS).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
-          ))}
-        </Select>
-        <Select
-          aria-label="Filtrar por categoria"
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value as LeadCategory | typeof NO_CATEGORY_FILTER | '')}
-          className="w-full"
-        >
-          <option value="">Todas categorias</option>
-          <option value={NO_CATEGORY_FILTER}>Sem categoria</option>
-          {LEAD_CATEGORIES.map((item) => (
-            <option key={item.value} value={item.value}>{item.label}</option>
           ))}
         </Select>
         <Select aria-label="Filtrar por tag" value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} className="w-full">
@@ -173,71 +147,78 @@ export default function LeadsPage() {
                 </tr>
               </thead>
               <tbody>
-                {leads.map((lead) => (
-                  <tr
-                    key={lead.id}
-                    className="border-b border-zinc-800/50 hover:bg-zinc-900/50 cursor-pointer transition-colors"
-                    onClick={() => setSelectedLead(lead)}
-                  >
-                    <td className="p-3">
-                      <p className="font-medium text-zinc-200">{lead.name}</p>
-                      {(lead.category || lead.tags.length > 0) && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {lead.category && (
-                            <Badge
-                              variant="outline"
-                              className="border-cyan-500/30 bg-cyan-500/10 text-[10px] text-cyan-300"
-                            >
-                              {getCategoryLabel(lead.category)}
-                            </Badge>
-                          )}
-                          {lead.tags.slice(0, 2).map((t) => (
-                            <Badge key={t} variant="outline" className={`text-[10px] ${getTagColorClasses(t)}`}>{t}</Badge>
-                          ))}
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-3 text-zinc-400 hidden sm:table-cell">{lead.whatsapp}</td>
-                    <td className="p-3 hidden md:table-cell">
-                      <Badge variant="outline" className={getSourceColorClasses(lead.source)}>{SOURCE_LABELS[lead.source]}</Badge>
-                    </td>
-                    <td className="p-3">
-                      <Badge variant="outline" className={getStatusColorClasses(lead.status)}>{STATUS_LABELS[lead.status]}</Badge>
-                    </td>
-                    <td className={`p-3 hidden lg:table-cell ${VALUE_COLOR_CLASS}`}>{formatCurrency(lead.estimated_value)}</td>
-                    <td className="p-3 text-zinc-500 text-xs hidden lg:table-cell">{formatRelative(lead.last_interaction_at)}</td>
-                    <td className="p-3">
-                      <div className="flex justify-end gap-1">
-                        <Button
+                {leads.map((lead) => {
+                  const href = normalizeLeadLink(lead.link);
+                  return (
+                    <tr
+                      key={lead.id}
+                      className="border-b border-zinc-800/50 hover:bg-zinc-900/50 cursor-pointer transition-colors"
+                      onClick={() => setSelectedLead(lead)}
+                    >
+                      <td className="p-3">
+                        <p className="font-medium text-zinc-200">{lead.name}</p>
+                        {(href || lead.tags.length > 0) && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {href && (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(event) => event.stopPropagation()}
+                                className="inline-flex items-center gap-1 rounded-md border border-cyan-500/30 bg-cyan-500/10 px-1.5 py-0.5 text-[10px] font-medium text-cyan-300 hover:bg-cyan-500/20"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                                Link
+                              </a>
+                            )}
+                            {lead.tags.slice(0, 2).map((t) => (
+                              <Badge key={t} variant="outline" className={`text-[10px] ${getTagColorClasses(t)}`}>{t}</Badge>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-3 text-zinc-400 hidden sm:table-cell">{lead.whatsapp}</td>
+                      <td className="p-3 hidden md:table-cell">
+                        <Badge variant="outline" className={getSourceColorClasses(lead.source)}>{SOURCE_LABELS[lead.source]}</Badge>
+                      </td>
+                      <td className="p-3">
+                        <Badge variant="outline" className={getStatusColorClasses(lead.status)}>{STATUS_LABELS[lead.status]}</Badge>
+                      </td>
+                      <td className={`p-3 hidden lg:table-cell ${VALUE_COLOR_CLASS}`}>{formatCurrency(lead.estimated_value)}</td>
+                      <td className="p-3 text-zinc-500 text-xs hidden lg:table-cell">{formatRelative(lead.last_interaction_at)}</td>
+                      <td className="p-3">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setSelectedLead(lead);
+                            }}
+                          >
+                            Abrir
+                          </Button>
+                          <Button
                           variant="ghost"
                           size="sm"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setSelectedLead(lead);
+                          className={DELETE_BUTTON_CLASS}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              await deleteLead(lead.id);
+                              toast.success('Lead removido');
+                            } catch (error) {
+                              toast.error(error instanceof Error ? error.message : 'Erro ao remover lead');
+                            }
                           }}
                         >
-                          Abrir
-                        </Button>
-                        <Button
-                        variant="ghost"
-                        size="sm"
-                        className={DELETE_BUTTON_CLASS}
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          try {
-                            await deleteLead(lead.id);
-                            toast.success('Lead removido');
-                          } catch (error) {
-                            toast.error(error instanceof Error ? error.message : 'Erro ao remover lead');
-                          }
-                        }}
-                      >
-                        Excluir
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          Excluir
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

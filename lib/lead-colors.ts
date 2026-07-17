@@ -1,4 +1,4 @@
-import type { LeadCategory, LeadSource, LeadStatus } from '@/types';
+import type { LeadSource, LeadStatus } from '@/types';
 
 export const VALUE_COLOR_CLASS = 'text-emerald-400 font-medium';
 export const DELETE_BUTTON_CLASS = 'text-red-500 hover:text-red-400 hover:bg-red-500/10';
@@ -32,10 +32,6 @@ export const SOURCE_COLORS: Record<LeadSource, string> = {
   outro: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30',
 };
 
-export const CATEGORY_COLORS: Record<LeadCategory, string> = {
-  links: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
-};
-
 const TAG_COLORS = [
   'bg-violet-500/20 text-violet-400 border-violet-500/30',
   'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
@@ -55,10 +51,6 @@ export function getStatusDotColor(status: LeadStatus | string, fallback = '#a1a1
 
 export function getSourceColorClasses(source: LeadSource): string {
   return SOURCE_COLORS[source];
-}
-
-export function getCategoryColorClasses(category: LeadCategory): string {
-  return CATEGORY_COLORS[category];
 }
 
 export function getTagColorClasses(tag: string): string {

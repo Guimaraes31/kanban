@@ -7,7 +7,6 @@ import type {
   DashboardStats,
   Lead,
   LeadActivity,
-  LeadCategory,
   LeadSource,
   LeadStatus,
   MessageTemplate,
@@ -42,7 +41,7 @@ interface StoreContextValue {
   updatePipelineStages: (stages: PipelineStage[]) => Promise<void>;
   scheduleFollowUp: (leadId: string, templateId: string, content: string, delay: ScheduledMessage['delay']) => Promise<ScheduledMessage>;
   markMessageSent: (id: string) => Promise<void>;
-  getLeads: (filters?: { source?: LeadSource; status?: LeadStatus; category?: LeadCategory; tag?: string; search?: string }) => Lead[];
+  getLeads: (filters?: { source?: LeadSource; status?: LeadStatus; tag?: string; search?: string }) => Lead[];
 }
 
 const EMPTY_PIPELINE: Pipeline = {
@@ -239,15 +238,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [refresh, userId]);
 
-  const getLeads = useCallback((filters?: { source?: LeadSource; status?: LeadStatus; category?: LeadCategory; tag?: string; search?: string }) => {
+  const getLeads = useCallback((filters?: { source?: LeadSource; status?: LeadStatus; tag?: string; search?: string }) => {
     let result = [...leads];
     if (filters?.source) result = result.filter((lead) => lead.source === filters.source);
     if (filters?.status) result = result.filter((lead) => lead.status === filters.status);
-    if (filters?.category) result = result.filter((lead) => lead.category === filters.category);
     if (filters?.tag) result = result.filter((lead) => lead.tags.includes(filters.tag!));
     if (filters?.search) {
       const query = filters.search.toLowerCase();
-      result = result.filter((lead) => lead.name.toLowerCase().includes(query) || lead.whatsapp.includes(query) || lead.email?.toLowerCase().includes(query));
+      result = result.filter((lead) =>
+        lead.name.toLowerCase().includes(query)
+        || lead.whatsapp.includes(query)
+        || lead.email?.toLowerCase().includes(query)
+        || lead.link?.toLowerCase().includes(query)
+      );
     }
     return result;
   }, [leads]);

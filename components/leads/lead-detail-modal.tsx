@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageCircle, Clock, LoaderCircle, Tag, CheckCircle } from 'lucide-react';
+import { MessageCircle, Clock, LoaderCircle, ExternalLink, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LeadForm } from './lead-form';
 import { useStore } from '@/hooks/use-store';
-import { formatCurrency, formatRelative, formatWhatsAppLink } from '@/lib/utils';
+import { formatCurrency, formatRelative, formatWhatsAppLink, normalizeLeadLink } from '@/lib/utils';
 import { applyTemplate } from '@/lib/seed';
 import { getSourceColorClasses, getStatusColorClasses, getTagColorClasses, VALUE_COLOR_CLASS } from '@/lib/lead-colors';
 import { SOURCE_LABELS, STATUS_LABELS, type Lead } from '@/types';
@@ -32,6 +32,7 @@ export function LeadDetailModal({ lead: leadProp, open, onClose }: LeadDetailMod
 
   const activities = getActivities(lead.id);
   const welcomeTemplate = templates.find((t) => t.category === 'welcome');
+  const leadLink = normalizeLeadLink(lead.link);
 
   const handleWhatsApp = () => {
     const message = welcomeTemplate
@@ -125,13 +126,36 @@ export function LeadDetailModal({ lead: leadProp, open, onClose }: LeadDetailMod
                 <p className="text-sm font-medium text-zinc-200">{formatRelative(lead.last_interaction_at)}</p>
               </div>
               <div className="rounded-lg bg-zinc-800/50 p-3">
-                <p className="text-xs text-zinc-500">Categoria</p>
-                <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-zinc-200">
-                  <Tag className="h-3.5 w-3.5 text-cyan-400" />
-                  {lead.category === 'links' ? 'Links' : 'Sem categoria'}
-                </p>
+                <p className="text-xs text-zinc-500">Link</p>
+                {leadLink ? (
+                  <a
+                    href={leadLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-flex max-w-full items-center gap-1.5 text-sm font-medium text-cyan-300 hover:text-cyan-200"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">Abrir link</span>
+                  </a>
+                ) : (
+                  <p className="mt-1 text-sm font-medium text-zinc-500">Sem link</p>
+                )}
               </div>
             </div>
+
+            {leadLink && (
+              <div className="rounded-lg bg-zinc-800/30 p-3 mb-4">
+                <p className="text-xs text-zinc-500 mb-1">URL</p>
+                <a
+                  href={leadLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="break-all text-sm text-cyan-300 hover:text-cyan-200"
+                >
+                  {leadLink}
+                </a>
+              </div>
+            )}
 
             {lead.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-4">
